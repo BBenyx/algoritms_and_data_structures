@@ -1,91 +1,201 @@
+const LAYOUT: std::alloc::Layout = std::alloc::Layout::new::<Node>();
+
 struct Node {
     data: u32,
     next: *mut Node,
+    prev: *mut Node,
 }
 
 impl Node {
-    fn new(data:u32, next: *mut Node) -> *mut Node {
-        let layout = std::alloc::Layout::new::<Node>();
+    fn new(data: u32, next: *mut Node, prev: *mut Node) -> *mut Node {
+
         unsafe {
-            let ptr : *mut Node = std::alloc::alloc(layout) as *mut Node;
-            (*ptr).data = data;
-            (*ptr).next = next;
-            ptr as *mut Node
+            let ptr = std::alloc::alloc(LAYOUT) as *mut Node;
+
+            std::ptr::write(
+                ptr,
+                Node {
+                    data,
+                    next,
+                    prev
+                }
+            );
+
+            ptr
         }
     }
 }
 
-struct LL {
+struct RDLL {
     head: *mut Node,
 }
 
-impl LL {
+impl RDLL {
     pub fn new() -> Self {
-        LL { head : std::ptr::null_mut() }
+        RDLL { head : std::ptr::null_mut() }
     }
 
     pub fn size(&self) -> usize {
+        if self.head.is_null() { return 0; }
+
         let mut current = self.head;
         let mut count = 0;
-        while !current.is_null() {
+        //do while
+        loop {
             count += 1;
             unsafe { current = (*current).next; }
+
+            if current == self.head {
+                break;
+            }
         }
         count
     }
 
+    pub fn empty(&self) -> bool {
+        self.head.is_null()
+    }
+
     pub fn push_front(&mut self, value:u32) {
-        self.head = Node::new(value, self.head);
+        if self.head.is_null() {
+            let ptr = Node::new(value, std::ptr::null_mut(), std::ptr::null_mut());
+
+            unsafe {
+                (*ptr).next = ptr;
+                (*ptr).prev = ptr;
+            }
+
+            self.head = ptr;
+
+        } else {
+            let prev_ptr = unsafe { (*self.head).prev };
+            let ptr = Node::new(value, self.head, prev_ptr);
+
+            unsafe {
+                (*prev_ptr).next = ptr;
+                (*self.head).prev = ptr;
+            }
+
+            self.head = ptr;
+        }
     }
 
     pub fn push_back(&mut self, value:u32) {
         if self.head.is_null() {
             self.push_front(value);
+
         } else {
             unsafe {
-                let mut current = self.head;
-                while !(*current).next.is_null() {
-                    current = (*current).next;
-                }
-                (*current).next = Node::new(value, std::ptr::null_mut());
+                let old_prev_ptr = (*self.head).prev;
+                let ptr = Node::new(value, self.head, old_prev_ptr);
+
+                (*old_prev_ptr).next = ptr;
+                (*self.head).prev = ptr;
             }
         }
     }
-}
 
-impl Drop for LL {
-    fn drop(&mut self) {
-        let layout = std::alloc::Layout::new::<Node>();
-        while !self.head.is_null() {
-            let tmp = self.head;
+    pub fn pop_front(&mut self) -> Option<u32> {
+        if self.head.is_null() { return None }
+
+        let return_data = unsafe { (*self.head).data };
+
+        if unsafe { (*self.head).next == (*self.head).prev } {
+            self.head = std::ptr::null_mut();
+
+        } else {
+            let old_ptr = self.head;
+            
             unsafe {
-                self.head = (*self.head).next; 
-                std::alloc::dealloc(tmp as *mut u8, layout)
+                let next = (*self.head).next;
+                let prev = (*self.head).prev;
+
+                (*prev).next = next;
+                (*next).prev = prev;
+
+                self.head = next;
+                std::alloc::dealloc(old_ptr as *mut u8, LAYOUT);
             }
+        }
+        Some(return_data)
+    }
+
+    pub fn pop_back(&mut self) -> Option<u32> {
+        if self.head.is_null() { return None }
+
+        let return_data = unsafe {
+            let last_elem = (*self.head).prev;
+            (*last_elem).data
+        };
+        if unsafe { (*self.head).next == (*self.head).prev } {
+            self.head = std::ptr::null_mut();
+
+        } else {
+            unsafe {
+                let old_ptr = (*self.head).prev;
+                let next = self.head;
+                let prev = (*old_ptr).prev;
+
+                (*prev).next = next;
+                (*next).prev = prev;
+
+                std::alloc::dealloc(old_ptr as *mut u8, LAYOUT);
+            }
+        }
+        Some(return_data)
+    }
+
+}
+
+impl Drop for RDLL {
+    fn drop(&mut self) {
+
+        while !self.head.is_null() {
+            self.pop_front();
         }
     }
 }
 
-impl std::fmt::Display for LL {
+impl std::fmt::Display for RDLL {
+
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+
         let mut current = self.head;        
         write!(f, "HEAD({:p}) -> ", self.head)?;
         unsafe {
-            while !current.is_null() {
+            loop {
                 write!(f, "[{}, {:p}] -> ", (*current).data, (*current).next)?;
                 current = (*current).next;
+
+                if self.head == current {
+                    break;
+                }
             }
         } 
-        write!(f, "NULL")
+        write!(f, "HEAD({:p})", self.head)
     }
 }
 
 fn main() {
-    let mut ll1 = LL::new();
-    ll1.push_front(1);
-    ll1.push_front(22);
-    ll1.push_front(333);
-    ll1.push_back(4444);
-    println!("{}", ll1.size());
-    println!("{}", ll1);
+    let mut rdll1 = RDLL::new();
+
+    println!("\nThe doubly linked list is {}", if rdll1.empty() { "empty!" } else {"not empty!"});
+
+    rdll1.push_front(1);
+    rdll1.push_front(22);
+    rdll1.push_front(333);
+    rdll1.push_back(4444);
+
+    println!("\nSize: {}", rdll1.size());
+    println!("\n{}", rdll1);
+
+
+    println!("\nPop_front: {}", rdll1.pop_front().unwrap());
+    println!("Pop_back: {}", rdll1.pop_back().unwrap());
+
+    println!("\nSize: {}", rdll1.size());
+    println!("\n{}", rdll1);
+    println!("\nThe doubly linked list is {}", if rdll1.empty() { "empty!" } else {"not empty!"});
+
+
 }
