@@ -1,3 +1,4 @@
 https://github.com/hegyhati/ClassRoomExamples/blob/master/FHWN/DA/2026_09_29_LL/ll.rs
 https://doc.rust-lang.org/std/ptr/fn.write.html
 https://users.rust-lang.org/t/do-while-in-rust-language/39361
+https://doc.rust-lang.org/std/ptr/fn.read.html
