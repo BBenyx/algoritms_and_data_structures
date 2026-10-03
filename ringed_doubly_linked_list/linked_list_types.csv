@@ -1,0 +1,11 @@
+,Time complexity of each LL,,,
+Function,Singly Linked List,Doubly Linked List,Circular Linked List,Circular Doubly Linked List
+push_front(x),O(1),O(1),O(n)*,O(1)
+push_back(x),O(n)*,O(n)*,O(n)*,O(1)
+pop_front() → x,O(1),O(1),O(n)*,O(1)
+pop_back() → x,O(n),O(n),O(n),O(1)
+size() → int,O(n)**,O(n)**,O(n)**,O(n)**
+empty() → bool,O(1),O(1),O(1),O(1)
+read(n) → x,O(n),O(n),O(n),O(n)
+* With tail pointer O(1),,,,
+** With size counter in head O(1),,,,
