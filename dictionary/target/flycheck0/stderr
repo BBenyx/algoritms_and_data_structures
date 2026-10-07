@@ -1,92 +1,12 @@
-   0.008912038s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint: fingerprint error for dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary)/Check { test: false }/TargetInner { name: "dictionary", doc: true, ..: with_path("/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/src/main.rs", Edition2024) }
-   0.008943199s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint:     err: failed to read `/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/target/debug/.fingerprint/dictionary-190d5c1515801866/bin-dictionary`
-
-Caused by:
-    No such file or directory (os error 2)
-
-Stack backtrace:
-   0: cargo_util::paths::read_bytes
-   1: cargo_util::paths::read
-   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
-   3: cargo::core::compiler::fingerprint::prepare_target
-   4: cargo::core::compiler::compile
-   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
-   6: cargo::ops::cargo_compile::compile_ws
-   7: cargo::ops::cargo_compile::compile_with_exec
-   8: cargo::ops::cargo_compile::compile
-   9: cargo::commands::check::exec
-  10: <cargo::cli::Exec>::exec
-  11: cargo::main
-  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
-  13: std::rt::lang_start::<()>::{closure#0}
-  14: <&dyn core::ops::function::Fn<(), Output = i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe as core::ops::function::FnOnce<()>>::call_once
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/core/src/ops/function.rs:287:21
-  15: std::panicking::catch_unwind::do_call::<&dyn core::ops::function::Fn<(), Output = i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe, i32>
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/panicking.rs:581:40
-  16: std::panicking::catch_unwind::<i32, &dyn core::ops::function::Fn<(), Output = i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe>
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/panicking.rs:544:19
-  17: std::panic::catch_unwind::<&dyn core::ops::function::Fn<(), Output = i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe, i32>
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/panic.rs:359:14
-  18: std::rt::lang_start_internal::{closure#0}
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/rt.rs:175:24
-  19: std::panicking::catch_unwind::do_call::<std::rt::lang_start_internal::{closure#0}, isize>
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/panicking.rs:581:40
-  20: std::panicking::catch_unwind::<isize, std::rt::lang_start_internal::{closure#0}>
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/panicking.rs:544:19
-  21: std::panic::catch_unwind::<std::rt::lang_start_internal::{closure#0}, isize>
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/panic.rs:359:14
-  22: std::rt::lang_start_internal
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/rt.rs:171:5
-  23: main
-  24: __libc_start_call_main
-             at ./csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-  25: __libc_start_main_impl
-             at ./csu/../csu/libc-start.c:360:3
-  26: <unknown>
-   0.097660877s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint: fingerprint error for dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary)/Check { test: true }/TargetInner { name: "dictionary", doc: true, ..: with_path("/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/src/main.rs", Edition2024) }
-   0.097675484s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint:     err: failed to read `/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/target/debug/.fingerprint/dictionary-ab4074387641913a/test-bin-dictionary`
-
-Caused by:
-    No such file or directory (os error 2)
-
-Stack backtrace:
-   0: cargo_util::paths::read_bytes
-   1: cargo_util::paths::read
-   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
-   3: cargo::core::compiler::fingerprint::prepare_target
-   4: cargo::core::compiler::compile
-   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
-   6: cargo::ops::cargo_compile::compile_ws
-   7: cargo::ops::cargo_compile::compile_with_exec
-   8: cargo::ops::cargo_compile::compile
-   9: cargo::commands::check::exec
-  10: <cargo::cli::Exec>::exec
-  11: cargo::main
-  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
-  13: std::rt::lang_start::<()>::{closure#0}
-  14: <&dyn core::ops::function::Fn<(), Output = i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe as core::ops::function::FnOnce<()>>::call_once
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/core/src/ops/function.rs:287:21
-  15: std::panicking::catch_unwind::do_call::<&dyn core::ops::function::Fn<(), Output = i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe, i32>
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/panicking.rs:581:40
-  16: std::panicking::catch_unwind::<i32, &dyn core::ops::function::Fn<(), Output = i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe>
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/panicking.rs:544:19
-  17: std::panic::catch_unwind::<&dyn core::ops::function::Fn<(), Output = i32> + core::marker::Sync + core::panic::unwind_safe::RefUnwindSafe, i32>
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/panic.rs:359:14
-  18: std::rt::lang_start_internal::{closure#0}
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/rt.rs:175:24
-  19: std::panicking::catch_unwind::do_call::<std::rt::lang_start_internal::{closure#0}, isize>
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/panicking.rs:581:40
-  20: std::panicking::catch_unwind::<isize, std::rt::lang_start_internal::{closure#0}>
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/panicking.rs:544:19
-  21: std::panic::catch_unwind::<std::rt::lang_start_internal::{closure#0}, isize>
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/panic.rs:359:14
-  22: std::rt::lang_start_internal
-             at /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library/std/src/rt.rs:171:5
-  23: main
-  24: __libc_start_call_main
-             at ./csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-  25: __libc_start_main_impl
-             at ./csu/../csu/libc-start.c:360:3
-  26: <unknown>
+   0.008860485s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint: stale: changed "/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/src/main.rs"
+   0.008869403s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint:           (vs) "/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/target/debug/.fingerprint/dictionary-190d5c1515801866/dep-bin-dictionary"
+   0.008872360s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint:                FileTime { seconds: 1791388072, nanos: 932523678 } < FileTime { seconds: 1791388244, nanos: 378798850 }
+   0.008898187s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint: fingerprint dirty for dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary)/Check { test: false }/TargetInner { name: "dictionary", doc: true, ..: with_path("/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/src/main.rs", Edition2024) }
+   0.008905883s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleItem(ChangedFile { reference: "/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/target/debug/.fingerprint/dictionary-190d5c1515801866/dep-bin-dictionary", reference_mtime: FileTime { seconds: 1791388072, nanos: 932523678 }, stale: "/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/src/main.rs", stale_mtime: FileTime { seconds: 1791388244, nanos: 378798850 } }))
+   0.009052004s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint: stale: changed "/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/src/main.rs"
+   0.009056097s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint:           (vs) "/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/target/debug/.fingerprint/dictionary-ab4074387641913a/dep-test-bin-dictionary"
+   0.009058467s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint:                FileTime { seconds: 1791388072, nanos: 932523678 } < FileTime { seconds: 1791388244, nanos: 378798850 }
+   0.009074419s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint: fingerprint dirty for dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary)/Check { test: true }/TargetInner { name: "dictionary", doc: true, ..: with_path("/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/src/main.rs", Edition2024) }
+   0.009081026s  INFO prepare_target{force=false package_id=dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary) target="dictionary"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleItem(ChangedFile { reference: "/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/target/debug/.fingerprint/dictionary-ab4074387641913a/dep-test-bin-dictionary", reference_mtime: FileTime { seconds: 1791388072, nanos: 932523678 }, stale: "/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/src/main.rs", stale_mtime: FileTime { seconds: 1791388244, nanos: 378798850 } }))
     Checking dictionary v0.1.0 (/data/rustProgramming/aad/algoritms_and_data_structures/dictionary)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.34s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
