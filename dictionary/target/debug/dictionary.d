@@ -1,1 +1,1 @@
-C:\Users\juhas\fh_dev\algorithms_and_datastructures\algoritms_and_data_structures\dictionary\target\debug\dictionary.exe: C:\Users\juhas\fh_dev\algorithms_and_datastructures\algoritms_and_data_structures\dictionary\src\main.rs
+/data/rustProgramming/aad/algoritms_and_data_structures/dictionary/target/debug/dictionary: /data/rustProgramming/aad/algoritms_and_data_structures/dictionary/src/dictionary.rs /data/rustProgramming/aad/algoritms_and_data_structures/dictionary/src/main.rs
