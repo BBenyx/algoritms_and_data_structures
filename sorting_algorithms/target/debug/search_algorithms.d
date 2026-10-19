@@ -1,1 +1,0 @@
-/data/rustProgramming/aad/algoritms_and_data_structures/sorting_algorithms/target/debug/search_algorithms: /data/rustProgramming/aad/algoritms_and_data_structures/sorting_algorithms/src/main.rs

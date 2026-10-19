@@ -72,3 +72,19 @@ fn insertion_sort<T: PartialOrd>(list: &mut [T]) {
         }
     }
 }
+
+fn selection_sort<T: PartialOrd>(list: &mut [T]) {
+    if list.is_empty() { return; }
+
+    for i in 1..list.len() {
+        let mut smallest = i;
+        
+        for n in i..list.len() {
+            if list[n] < list[smallest] {
+                smallest = n;
+            }
+        }
+
+        //for c in 
+    }
+}
