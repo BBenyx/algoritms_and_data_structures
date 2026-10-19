@@ -2,6 +2,7 @@ fn main() {
     let mut test_list1 = vec![5,2,8,1,6,32,65,2,6,8,3,2,5,7];
     let mut test_list2 = vec!['b','g','l','q','a','m','v','y','i','l'];
     let mut test_list3 = vec![5,2,8,1,6,32,65,2,6,8,3,2,5,7];
+    let mut test_list4 = vec!['b','g','l','q','a','m','v','y','i','l'];
 
     println!("Original: {:?}", &test_list1);
     bubble_sort(&mut test_list1);
@@ -14,6 +15,10 @@ fn main() {
     println!("Original: {:?}", &test_list3);
     insertion_sort(&mut test_list3);
     println!("Sorted: {:?}", &test_list3);
+
+    println!("Original: {:?}", &test_list4);
+    selection_sort(&mut test_list4);
+    println!("Sorted: {:?}", &test_list4);
 }
 
 fn bubble_sort<T: PartialOrd>(list: &mut [T]) {
@@ -76,15 +81,16 @@ fn insertion_sort<T: PartialOrd>(list: &mut [T]) {
 fn selection_sort<T: PartialOrd>(list: &mut [T]) {
     if list.is_empty() { return; }
 
-    for i in 1..list.len() {
+    for i in 0..list.len() {
         let mut smallest = i;
         
-        for n in i..list.len() {
+        for n in i+1..list.len() {
             if list[n] < list[smallest] {
                 smallest = n;
             }
         }
-
-        //for c in 
+        for n in (i+1..=smallest).rev() {
+            list.swap(n-1, n);
+        }
     }
 }
