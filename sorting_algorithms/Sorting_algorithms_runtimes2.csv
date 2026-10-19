@@ -1,0 +1,10 @@
+Ordered (bubble sort),Ordered (shaker sort),Ordered (insertion sort),Ordered (selection sort),Reverse ordered (bubble sort),Reverse ordered (shaker sort),Reverse ordered (insertion sort),Reverse ordered (selection sort),Random (bubble sort),Random (shaker sort),Random (insertion sort),Random (selection sort),Binary alternating (bubble sort),Binary alternating (shaker sort),Binary alternating (insertion sort),Binary alternating (selection sort)
+0,2,0,40,316,326,244,323,193,170,118,175,98,109,61,110
+1,3,1,160,1254,1305,980,1304,819,703,488,716,392,420,257,437
+2,5,2,352,2817,2928,2205,2877,1762,1482,1048,1548,881,942,553,979
+3,7,3,623,5014,5204,3923,5193,3268,2668,1876,2773,1575,1675,983,1747
+4,9,4,974,7828,8122,6043,7788,5170,4190,3002,4380,2397,2549,1521,3712
+4,10,5,1437,11182,11818,8917,11288,7698,6896,4616,7258,4081,3745,2535,4284
+5,12,6,1898,16207,17272,13512,17734,10553,8479,7053,8783,5240,5144,3030,5360
+6,14,8,2995,20480,21933,16038,21527,13323,11069,7565,11469,6206,7129,3914,7034
+7,16,7,3117,24909,25766,19445,25313,16295,13419,9494,13932,7780,8498,4864,8627
