@@ -10,13 +10,56 @@ use sorting_algorithms::sorting::{
 mod test_cases;
 mod csv_writer;
 
+type ListCreator = fn(usize) -> Vec<i32>;
 type ListSorter<T> = fn(&mut [T]);
+
+struct TestConfiguration<T> {
+    range: std::ops::Range<usize>,
+    step: usize, // TODO: needs validation (it cannot be smaller then 0)
+    sample_size: usize, // TODO: needs validation (it cannot be smaller then 0)
+    algorithms: Vec<(String, ListSorter<T>)>, // TODO: Try replacing String with &'static str
+    distributions: Vec<(String, ListCreator)>, // TODO: Try replacing String with &'static str
+}
+
+impl<T> TestConfiguration<T> {
+    fn header(&self) -> Vec<String> {
+        [
+            "Sorting algorithm",
+            "Input size (n)",
+            "Distribution",
+            "Mean run time (ns)",
+            "Sample size for mean"
+        ].into_iter().map(String::from).collect()
+    }
+}
+
+impl<T: Ord> Default for TestConfiguration<T> {
+    fn default() -> Self {
+        Self {
+            range: 100..10000,
+            step: 200,
+            sample_size: 10,
+            algorithms: vec![
+                ("Bubble sort".to_string(), bubble_sort),
+                ("Shaker sort".to_string(), shaker_sort),
+                ("Insertion sort".to_string(), insertion_sort),
+                ("Selection sort".to_string(), selection_sort),
+                ("Heap sort".to_string(), heap_sort),
+            ],
+            distributions: vec![
+                ("Ordered".to_string(), test_cases::ordered),
+                ("Reverse".to_string(), test_cases::reverse_ordered),
+                ("Random".to_string(), test_cases::randoms),
+            ]
+        }
+    }
+}
 
 fn main() -> Result<(), Box<dyn Error>>{
     // Creates the results folder if it doesn't exists
     std::fs::create_dir_all("results")?;
 
-    let csv_data = write_builder(100, 1000, 200);
+    let csv_data = write_builder(TestConfiguration::default());
 
     csv_writer::write_to_csv(
         "results/Sorting_algorithms_runtimesN".to_string(),
@@ -26,38 +69,45 @@ fn main() -> Result<(), Box<dyn Error>>{
     Ok(())
 }
 
-fn write_builder(from: usize, to: usize , step: usize) -> Vec<Vec<String>> {
-    assert!(from < to);
-    let mut datas = vec![
-        ["Input (n)","Ordered (bubble sort)","Ordered (shaker sort)","Ordered (insertion sort)","Ordered (selection sort)","Ordered (heap sort)",
-        "Reverse ordered (bubble sort)","Reverse ordered (shaker sort)","Reverse ordered (insertion sort)","Reverse ordered (selection sort)", "Reverse ordered (heap sort)",
-        "Random (bubble sort)","Random (shaker sort)","Random (insertion sort)","Random (selection sort)","Random (heap sort)"].
-        into_iter().map(String::from).collect()];
+// TODO: try to solve the too much clone
+fn write_builder(configuration: TestConfiguration<i32>) -> Vec<Vec<String>> {
+    let range = configuration.range.clone();
+    let step = configuration.step;
+    let sample_size = configuration.sample_size;
 
-    let list_creators = [test_cases::ordered, test_cases::reverse_ordered, test_cases::randoms];
-    let sorters: [ListSorter<i32>; 5] = [bubble_sort, shaker_sort, insertion_sort, selection_sort, heap_sort];
+    let mut table = vec![configuration.header()];
 
-    let to = to - ((to - from) % step);
-    for n in (from..to).step_by(step) {
-        let mut row = Vec::new();
-        row.push(n.to_string());
+    let distributions = configuration.distributions;
+    let algrorithms = configuration.algorithms;
 
-        for creator in list_creators {
-            let list = creator(n);
-            let data: Vec<Vec<i32>> = (0..10)
-                .map(|_| list.clone())
-                .collect();
+    for n in range.step_by(step) {
 
-            for sorter in sorters {
-                row.push(mean_run_time_of(sorter, data.clone()).to_string());
+        for (distr_name, distr) in distributions.clone() {
+            let test_list = distr(n);
+
+            for (algr_name, algr) in algrorithms.clone() {
+                let mut row = Vec::new();
+
+                row.push(algr_name);
+                row.push(n.to_string());
+                row.push(distr_name.clone());
+
+                let data: Vec<Vec<i32>> = (0..sample_size)
+                    .map(|_| test_list.clone())
+                    .collect();
+
+                row.push(mean_run_time_of(algr, data).to_string());
+                row.push(sample_size.to_string());
+
+                table.push(row);
             }
         }
-        datas.push(row);
     }
-    datas
+    table
 }
 
-fn mean_run_time_of<T: PartialOrd>(func: ListSorter<T>, list: Vec<Vec<T>>) -> u128 {
+fn mean_run_time_of<T: Ord>(func: ListSorter<T>, list: Vec<Vec<T>>) -> u128 {
+    assert!(!list.is_empty()); // TODO: try to solve this without panic (probably: Option)
     let mut runtimes: Vec<u128> = Vec::new();
 
     for mut elem in list {
@@ -69,12 +119,12 @@ fn mean_run_time_of<T: PartialOrd>(func: ListSorter<T>, list: Vec<Vec<T>>) -> u1
 
     // Taking the trimmed mean
 
-    let trim_val = if runtimes.len() >= 4 {
+    let trim_val = if runtimes.len() >= 10 {
         (runtimes.len() as f64 * 0.25) as usize
     } else {
         0
     };
-    
+
     let sum: u128 = runtimes[trim_val..runtimes.len() - trim_val].iter().sum();
 
     sum / (runtimes.len() - 2* trim_val) as u128
