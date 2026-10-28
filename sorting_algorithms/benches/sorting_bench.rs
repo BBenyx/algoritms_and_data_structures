@@ -44,10 +44,12 @@ fn write_builder(from: usize, to: usize , step: usize) -> Vec<Vec<String>> {
 
         for creator in list_creators {
             let list = creator(n);
+            let data: Vec<Vec<i32>> = (0..10)
+                .map(|_| list.clone())
+                .collect();
 
             for sorter in sorters {
-                let mut data = list.clone();
-                row.push(run_time_of(sorter, &mut data).to_string());
+                row.push(mean_run_time_of(sorter, data.clone()).to_string());
             }
         }
         datas.push(row);
@@ -55,11 +57,27 @@ fn write_builder(from: usize, to: usize , step: usize) -> Vec<Vec<String>> {
     datas
 }
 
-fn run_time_of<T: PartialOrd>(func: ListSorter<T>, val: &mut [T]) -> u128 {
-    let start = Instant::now();
-    func(val);
+fn mean_run_time_of<T: PartialOrd>(func: ListSorter<T>, list: Vec<Vec<T>>) -> u128 {
+    let mut runtimes: Vec<u128> = Vec::new();
 
-    start.elapsed().as_micros()
+    for mut elem in list {
+        let start = Instant::now();
+        func(&mut elem);
+        runtimes.push(start.elapsed().as_nanos());
+    }
+    runtimes.sort();
+
+    // Taking the trimmed mean
+
+    let trim_val = if runtimes.len() >= 4 {
+        (runtimes.len() as f64 * 0.25) as usize
+    } else {
+        0
+    };
+    
+    let sum: u128 = runtimes[trim_val..runtimes.len() - trim_val].iter().sum();
+
+    sum / (runtimes.len() - 2* trim_val) as u128
 }
 
 
