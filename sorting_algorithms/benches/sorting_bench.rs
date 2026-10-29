@@ -1,4 +1,4 @@
-use std::{error::Error, time::Instant};
+use std::{error::Error, time::Instant, env};
 use sorting_algorithms::sorting::{
     bubble_sort::bubble_sort,
     shaker_sort::shaker_sort,
@@ -15,10 +15,10 @@ type ListSorter<T> = fn(&mut [T]);
 
 struct TestConfiguration<T> {
     range: std::ops::Range<usize>,
-    step: usize, // TODO: needs validation (it cannot be smaller then 0)
-    sample_size: usize, // TODO: needs validation (it cannot be smaller then 0)
-    algorithms: Vec<(String, ListSorter<T>)>, // TODO: Try replacing String with &'static str
-    distributions: Vec<(String, ListCreator)>, // TODO: Try replacing String with &'static str
+    step: usize,
+    sample_size: usize,
+    algorithms: Vec<(&'static str, ListSorter<T>)>,
+    distributions: Vec<(&'static str, ListCreator)>,
 }
 
 impl<T> TestConfiguration<T> {
@@ -40,40 +40,51 @@ impl<T: Ord> Default for TestConfiguration<T> {
             step: 200,
             sample_size: 10,
             algorithms: vec![
-                ("Bubble sort".to_string(), bubble_sort),
-                ("Shaker sort".to_string(), shaker_sort),
-                ("Insertion sort".to_string(), insertion_sort),
-                ("Selection sort".to_string(), selection_sort),
-                ("Heap sort".to_string(), heap_sort),
+                ("Bubble sort", bubble_sort),
+                ("Shaker sort", shaker_sort),
+                ("Insertion sort", insertion_sort),
+                ("Selection sort", selection_sort),
+                ("Heap sort", heap_sort),
             ],
             distributions: vec![
-                ("Ordered".to_string(), test_cases::ordered),
-                ("Reverse".to_string(), test_cases::reverse_ordered),
-                ("Random".to_string(), test_cases::randoms),
+                ("Ordered", test_cases::ordered),
+                ("Reverse", test_cases::reverse_ordered),
+                ("Random", test_cases::randoms),
             ]
         }
     }
 }
 
+
 fn main() -> Result<(), Box<dyn Error>>{
-    // Creates the results folder if it doesn't exists
-    std::fs::create_dir_all("results")?;
+    let arg = match env::args().nth(1) {
+        Some(val) => val,
+        None => return Err("No file name argument was given!")?
+    };
+    let file_name = arg.trim().trim_matches('/').split('/').nth(0).unwrap();
+    if file_name.len() == 0 { return Err("The given file name argument cannot be a file name!")?}
 
     let csv_data = write_builder(TestConfiguration::default());
 
+    // Creates the results folder if it doesn't exists
+    std::fs::create_dir_all("results")?;
     csv_writer::write_to_csv(
-        "results/Sorting_algorithms_runtimesN".to_string(),
+        format!("results/{}", file_name),
         csv_data
     )?;
 
     Ok(())
 }
 
-// TODO: try to solve the too much clone
+
 fn write_builder(configuration: TestConfiguration<i32>) -> Vec<Vec<String>> {
-    let range = configuration.range.clone();
     let step = configuration.step;
     let sample_size = configuration.sample_size;
+    if step == 0 || step == 0 {
+        return vec![Vec::new()]
+    }
+
+    let range = configuration.range.clone();
 
     let mut table = vec![configuration.header()];
 
@@ -82,15 +93,15 @@ fn write_builder(configuration: TestConfiguration<i32>) -> Vec<Vec<String>> {
 
     for n in range.step_by(step) {
 
-        for (distr_name, distr) in distributions.clone() {
+        for (distr_name, distr) in &distributions {
             let test_list = distr(n);
 
-            for (algr_name, algr) in algrorithms.clone() {
+            for (algr_name, algr) in &algrorithms {
                 let mut row = Vec::new();
 
-                row.push(algr_name);
+                row.push(algr_name.to_string());
                 row.push(n.to_string());
-                row.push(distr_name.clone());
+                row.push(distr_name.to_string());
 
                 let data: Vec<Vec<i32>> = (0..sample_size)
                     .map(|_| test_list.clone())
@@ -106,8 +117,8 @@ fn write_builder(configuration: TestConfiguration<i32>) -> Vec<Vec<String>> {
     table
 }
 
-fn mean_run_time_of<T: Ord>(func: ListSorter<T>, list: Vec<Vec<T>>) -> u128 {
-    assert!(!list.is_empty()); // TODO: try to solve this without panic (probably: Option)
+fn mean_run_time_of<T: Ord>(func: &ListSorter<T>, list: Vec<Vec<T>>) -> u128 {
+    assert!(!list.is_empty());
     let mut runtimes: Vec<u128> = Vec::new();
 
     for mut elem in list {
@@ -129,6 +140,3 @@ fn mean_run_time_of<T: Ord>(func: ListSorter<T>, list: Vec<Vec<T>>) -> u128 {
 
     sum / (runtimes.len() - 2* trim_val) as u128
 }
-
-
-

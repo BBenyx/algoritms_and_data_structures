@@ -6,3 +6,7 @@ edition = "2024"
 [dependencies]
 csv = "1.4.0"
 rand = "0.10.3"
+
+[[bench]]
+name = "sorting_bench"
+harness = false
