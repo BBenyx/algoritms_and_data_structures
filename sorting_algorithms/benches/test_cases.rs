@@ -21,7 +21,7 @@ pub fn randoms(n: usize) -> Vec<i32> {
 
     let mut list = Vec::new();
 
-    for i in 0..n {
+    for _ in 0..n {
         let random = rand::rng().random_range(0..3141);
         list.push(random);
     }

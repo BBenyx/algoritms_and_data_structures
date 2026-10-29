@@ -27,7 +27,7 @@ impl<T> TestConfiguration<T> {
             "Sorting algorithm",
             "Input size (n)",
             "Distribution",
-            "Mean run time (ns)",
+            "Mean runtime (ns)",
             "Sample size for mean"
         ].into_iter().map(String::from).collect()
     }
@@ -59,17 +59,18 @@ impl<T: Ord> Default for TestConfiguration<T> {
 fn main() -> Result<(), Box<dyn Error>>{
     let arg = match env::args().nth(1) {
         Some(val) => val,
-        None => return Err("No file name argument was given!")?
+        None => return Err("No file name parameter was given!")?
     };
     let file_name = arg.trim().trim_matches('/').split('/').nth(0).unwrap();
-    if file_name.len() == 0 { return Err("The given file name argument cannot be a file name!")?}
+    if file_name.len() == 0 { return Err("The given file name parameter cannot be a file name!")?}
+    println!("{}", file_name);
 
     let csv_data = write_builder(TestConfiguration::default());
 
     // Creates the results folder if it doesn't exists
-    std::fs::create_dir_all("results")?;
+    std::fs::create_dir_all("data")?;
     csv_writer::write_to_csv(
-        format!("results/{}", file_name),
+        format!("data/{}", file_name),
         csv_data
     )?;
 

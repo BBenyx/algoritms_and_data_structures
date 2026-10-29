@@ -1,0 +1,114 @@
+---
+title: "`r params$report_title`"
+subtitle: "Input file: `r basename(params$csv_file)`"
+author: "Benedek Juhász"
+date: "`r Sys.Date()`"
+output: pdf_document
+params:
+    csv_file: ""
+    report_title: ""
+---
+
+
+## Report
+```{r, include=FALSE}
+
+data <- read.csv(params$csv_file)
+
+algorithms <- unique(data[["Sorting.algorithm"]])
+distributions <- unique(data[["Distribution"]])
+max_sample <- max(data[["Sample.size.for.mean"]])
+min_input <- min(data[["Input.size..n."]])
+max_input <- max(data[["Input.size..n."]])
+
+```
+
+#### **Algorithms tested**: `r algorithms`
+#### **Distributions**: `r distributions`
+#### **Sample size for one trimmed mean**: `r max_sample`
+#### **Input range**: `r min_input` - `r max_input`
+
+```{r, echo=FALSE}
+
+plot_algorithm <- function(data, algorithm, x_lim = NULL, y_lim = NULL) {
+  filtered_data <- data[
+    data[["Sorting.algorithm"]] == algorithm,
+  ]
+  
+  if (nrow(filtered_data) == 0) {
+    stop(paste("Algorithm not found:", algorithm))
+  }
+  
+  # If no x_lim given calculates the common x-axis range
+  if (is.null(x_lim)) {
+    x_lim <- range(
+      filtered_data[["Input.size..n."]],
+      finite = TRUE
+    )
+  }
+  
+  # If no y_lim given calculates the common y-axis range
+  if (is.null(y_lim)) {
+    y_lim <- range(
+      filtered_data[["Mean.runtime..ns."]],
+      finite = TRUE
+    )
+  }
+
+  for (i in seq_along(distributions)) {
+    plot_data <- filtered_data[
+      filtered_data[["Distribution"]] == distributions[i],
+    ]
+
+    if (i == 1) {
+      plot(
+        plot_data[["Input.size..n."]],
+        plot_data[["Mean.runtime..ns."]],
+        type = "b",
+        xlim = x_lim,
+        ylim = y_lim,
+        col = i,
+        pch = 16,
+        xlab = "Input size",
+        ylab = "Execution Time (ns)",
+        main = paste(algorithm, "by input distribution")
+      )
+    } else {
+      lines(
+        plot_data[["Input.size..n."]],
+        plot_data[["Mean.runtime..ns."]],
+        type = "b",
+        col = i,
+        pch = 16
+      )
+    }
+  }
+
+  legend(
+    "topleft",
+    legend = distributions,
+    col = seq_along(distributions),
+    pch = 16,
+    lty = 1,
+    title = "Distributions"
+  )
+}
+```
+
+---
+
+## **Algorithm runtimes**  
+
+
+```{r, echo=FALSE, results='asis'}
+
+for (i in seq_along(algorithms)) {
+  plot_algorithm(data = data, algorithm = algorithms[i])
+  cat("\n\n\n")
+}
+
+```
+
+---
+
+## Notes:
