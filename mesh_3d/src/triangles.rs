@@ -2,6 +2,9 @@ use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::alloc;
 
+// So the problem is with the sort somehow, but I dont know how.
+
+
 #[derive(Clone, Copy, Debug)]
 struct Point {
     x: f32,
@@ -9,33 +12,28 @@ struct Point {
     z: f32,
 }
 
-impl Default for Point {
-    fn default() -> Self {
-        Point {
-            x: 0 as f32,
-            y: 0 as f32,
-            z: 0 as f32
-        }
-    }
-}
-
 type Triangle = [Point; 3];
 
-struct Mesh {
+struct Heap {
     cap: usize,
     size: usize,
     pov: Point,
     data: *mut Triangle,
 }
 
-impl Mesh {
-    fn new(cap: usize, pov: Point) -> Mesh {
-        Self {
+impl Heap {
+    fn new(cap: usize, pov: Point, from: &[Triangle]) -> Self {
+        let mut new = Self {
             cap,
             size: 0,
             pov,
             data: alloc_triangle(cap),
+        };
+
+        for i in 0..new.cap {
+            new.push(from[i]);
         }
+        new
     }
 
     fn resize(&mut self) {
@@ -50,14 +48,8 @@ impl Mesh {
         self.data = new_data;
     }
 
-    fn change_pov(&mut self, new_pov: Point) {
-        self.pov = new_pov;
-        self.min_heapify(self.size - 1, self.pov);
-    }
-
     fn push(&mut self, elem: Triangle) {
         if self.size == self.cap { self.resize(); }
-
         unsafe { *self.data.add(self.size) = elem; }
         self.size += 1;
 
@@ -117,20 +109,20 @@ impl Mesh {
     }
 }
 
-impl Drop for Mesh {
+impl Drop for Heap {
     fn drop(&mut self) {
         dealloc_triangle(self.data, self.cap);
     }
 }
 
-impl Clone for Mesh {
+impl Clone for Heap {
     fn clone(&self) -> Self {
         let new_data = alloc_triangle(self.cap);
 
         for i in 0..self.size {
             unsafe { *new_data.add(i) = *self.data.add(i); }
         }
-        Mesh {
+        Heap {
             cap: self.cap,
             size: self.size,
             pov: self.pov,
@@ -141,6 +133,19 @@ impl Clone for Mesh {
 
 fn left(idx: usize) -> usize { idx * 2 + 1 }
 fn right(idx: usize) -> usize { idx * 2 + 2 }
+
+
+struct Mesh {
+    triangles: Vec<Triangle>,
+}
+
+impl Mesh {
+    fn new() -> Mesh {
+        Self {
+            triangles: Vec::new(),
+        }
+    }
+}
 
 
 //---------------------
@@ -185,9 +190,8 @@ fn load_mesh(filename: &str) -> Mesh {
         .parse::<usize>()
         .unwrap_or_else(|error| panic!("invalid triangle count in '{filename}': {error}"));
     
-    let mut mesh = Mesh::new(triangle_count, Point::default());
+    let mut mesh = Mesh::new();
 
-    
     for _ in 0..triangle_count {
         let mut tmp_points= Vec::new();
         for _ in 0..3 {
@@ -209,8 +213,8 @@ fn load_mesh(filename: &str) -> Mesh {
             tmp_points.push(Point {x, y, z});
         }
 
-        let trianlge: Triangle = [tmp_points[0], tmp_points[1], tmp_points[2]];
-        mesh.push(trianlge);
+        let triangle: Triangle = [tmp_points[0], tmp_points[1], tmp_points[2]];
+        mesh.triangles.push(triangle);
     }
     mesh
 }
@@ -225,13 +229,10 @@ fn save_to_file(mesh: &Mesh, filename: &str) {
         .unwrap_or_else(|error| panic!("failed to create mesh file '{filename}': {error}"));
     let mut writer = BufWriter::new(file);
 
-    let mut new_mesh = mesh.clone();
+    writeln!(writer, "{}", mesh.triangles.len()).expect("failed to write triangle count");
 
-    writeln!(writer, "{}", mesh.len()).expect("failed to write triangle count");
-    loop {
-        let Some(point) = new_mesh.pop_min() else {
-            break;
-        };
+    for i in 0..mesh.triangles.len() {
+        let point = mesh.triangles[i];
         writeln!(
             writer,
             "{} {} {} {} {} {} {} {} {}",
@@ -243,17 +244,12 @@ fn save_to_file(mesh: &Mesh, filename: &str) {
 }
 
 fn closest_triangles(mesh: &Mesh, p: Point, count: usize) -> Mesh {
-    let mut tmp_mesh = mesh.clone();
-    tmp_mesh.change_pov(p);
-
-    let mut return_mesh = Mesh::new(count, p);
-    loop {
-        match tmp_mesh.pop_min() {
-            Some(triangle) => return_mesh.push(triangle),
+    let mut heap = Heap::new(count, p, &mesh.triangles);
+    let mut return_mesh = Mesh::new();
+    for _ in 0..count {
+        match heap.pop_min() {
+            Some(triangle) => return_mesh.triangles.push(triangle),
             None => break,
-        }
-        if return_mesh.len() >= count {
-            break;
         }
     }
     return_mesh
