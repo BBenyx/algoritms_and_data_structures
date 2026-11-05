@@ -4,6 +4,7 @@ use std::alloc;
 
 // So the problem is with the sort somehow, but I dont know how.
 
+type Triangle = [Point; 3];
 
 #[derive(Clone, Copy, Debug)]
 struct Point {
@@ -12,7 +13,19 @@ struct Point {
     z: f32,
 }
 
-type Triangle = [Point; 3];
+
+struct Mesh {
+    triangles: Vec<Triangle>,
+}
+
+impl Mesh {
+    fn new() -> Mesh {
+        Self {
+            triangles: Vec::new(),
+        }
+    }
+}
+
 
 struct Heap {
     cap: usize,
@@ -57,10 +70,16 @@ impl Heap {
     }
 
     fn pop_min(&mut self) -> Option<Triangle> {
-        if self.size == 0 { return None; }
-        let min: Triangle = self.at_idx(0);
-        let last = self.at_idx(self.size - 1);
+        if self.size == 0 {
+            return None;
+        } else if self.size == 1 {
+            self.size -= 1;
+            return Some(self.at_idx(0));
+        }
+
         self.size -= 1;
+        let min: Triangle = self.at_idx(0);
+        let last: Triangle = self.at_idx(self.size);
 
         unsafe { *self.data.add(0) = last; }
         self.min_heapify(0, self.pov);
@@ -77,27 +96,22 @@ impl Heap {
         }
     }
 
-    fn len(&self) -> usize {
-        self.size
-    }
-
     fn at_idx(&self, idx: usize) -> Triangle {
         unsafe { *self.data.add(idx) }
     }
 
     fn min_heapify(&mut self, idx: usize, p: Point) {
-        let l = left(idx);
-        let r = right(idx);
+        let l = idx*2 + 1;
+        let r = idx*2 + 2;
 
         let mut small_val = distance_pt(p, self.at_idx(idx));
         let mut small_idx = idx;
 
-        if l < self.len() && distance_pt(p, self.at_idx(l)) < small_val {
+        if l < self.size && distance_pt(p, self.at_idx(l)) < small_val {
             small_val = distance_pt(p, self.at_idx(l));
             small_idx = l;
-            
         }
-        if r < self.len() && distance_pt(p, self.at_idx(r)) < small_val {
+        if r < self.size && distance_pt(p, self.at_idx(r)) < small_val {
             small_idx = r;
         }
 
@@ -114,55 +128,6 @@ impl Drop for Heap {
         dealloc_triangle(self.data, self.cap);
     }
 }
-
-impl Clone for Heap {
-    fn clone(&self) -> Self {
-        let new_data = alloc_triangle(self.cap);
-
-        for i in 0..self.size {
-            unsafe { *new_data.add(i) = *self.data.add(i); }
-        }
-        Heap {
-            cap: self.cap,
-            size: self.size,
-            pov: self.pov,
-            data: new_data 
-        }
-    }
-}
-
-fn left(idx: usize) -> usize { idx * 2 + 1 }
-fn right(idx: usize) -> usize { idx * 2 + 2 }
-
-
-struct Mesh {
-    triangles: Vec<Triangle>,
-}
-
-impl Mesh {
-    fn new() -> Mesh {
-        Self {
-            triangles: Vec::new(),
-        }
-    }
-}
-
-
-//---------------------
-// Allocation
-
-fn alloc_triangle(count: usize) -> *mut Triangle {
-    let layout = alloc::Layout::array::<Triangle>(count).unwrap();
-    unsafe { alloc::alloc(layout) as *mut Triangle }
-}
-
-fn dealloc_triangle(ptr: *mut Triangle, count: usize) {
-    let layout = alloc::Layout::array::<Triangle>(count).unwrap();
-    unsafe { alloc::dealloc(ptr as *mut u8, layout) }
-}
-
-//--------------------
-
 
 
 fn distance_pp(p1: Point, p2: Point) -> f32 {
@@ -219,9 +184,8 @@ fn load_mesh(filename: &str) -> Mesh {
     mesh
 }
 
-fn free_mesh(_mesh: &mut Mesh) {
-    // TODO
-    //mesh.triangles.clear();
+fn free_mesh(mesh: &mut Mesh) {
+    mesh.triangles.clear();
 }
 
 fn save_to_file(mesh: &Mesh, filename: &str) {
@@ -284,3 +248,19 @@ pub fn main() {
         }
     }
 }
+
+
+//---------------------
+// Allocation
+
+fn alloc_triangle(count: usize) -> *mut Triangle {
+    let layout = alloc::Layout::array::<Triangle>(count).unwrap();
+    unsafe { alloc::alloc(layout) as *mut Triangle }
+}
+
+fn dealloc_triangle(ptr: *mut Triangle, count: usize) {
+    let layout = alloc::Layout::array::<Triangle>(count).unwrap();
+    unsafe { alloc::dealloc(ptr as *mut u8, layout) }
+}
+
+//--------------------
