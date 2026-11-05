@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::{BufWriter, Write};
 
 
+#[derive(Clone, Copy, PartialEq)]
 struct Point {
     x: f32,
     y: f32,
@@ -12,7 +13,13 @@ type Triangle = [Point; 3];
 
 
 struct Mesh {
-    // TODO
+    mesh: Vec<Triangle>,
+}
+
+impl Default for Mesh {
+    fn default() -> Self {
+        Mesh { mesh: Vec::new() }
+    }
 }
 
 fn distance_pp(p1: Point, p2: Point) -> f32 {
@@ -39,10 +46,11 @@ fn load_mesh(filename: &str) -> Mesh {
         .parse::<usize>()
         .unwrap_or_else(|error| panic!("invalid triangle count in '{filename}': {error}"));
     
-    // TODO 
+    let mut mesh = Mesh::default();
 
-    for t in 0..triangle_count {
-        for p in 0..3 {
+    for _ in 0..triangle_count {
+        let mut tmp_points= Vec::new();
+        for _ in 0..3 {
             let x = values
                 .next()
                 .expect("mesh file is missing a vertex coordinate")
@@ -58,10 +66,14 @@ fn load_mesh(filename: &str) -> Mesh {
                 .expect("mesh file is missing a vertex coordinate")
                 .parse::<f32>()
                 .expect("mesh vertex coordinate is not a valid number");  
-            // TODO    
+            tmp_points.push(Point {x, y, z});
         }
+
+        let tmp_trianlge = [tmp_points[0], tmp_points[1], tmp_points[2]];
+        mesh.mesh.push(tmp_trianlge);
     }
-    // TODO
+    
+    mesh
 }
 
 fn free_mesh(mesh: &mut Mesh) {
