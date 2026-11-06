@@ -1,8 +1,8 @@
+use std::alloc;
 use std::fs::File;
 use std::io::{BufWriter, Write};
-use std::alloc;
 
-// So the problem is with the sort somehow, but I dont know how.
+// So the problem is with the sort somehow, but I don't know how.
 
 type Triangle = [Point; 3];
 
@@ -26,7 +26,6 @@ impl Mesh {
     }
 }
 
-
 struct Heap {
     cap: usize,
     size: usize,
@@ -43,8 +42,8 @@ impl Heap {
             data: alloc_triangle(cap),
         };
 
-        for i in 0..new.cap {
-            new.push(from[i]);
+        for triangle in from.iter().take(new.cap) {
+            new.push(*triangle);
         }
         new
     }
@@ -62,11 +61,33 @@ impl Heap {
     }
 
     fn push(&mut self, elem: Triangle) {
-        if self.size == self.cap { self.resize(); }
-        unsafe { *self.data.add(self.size) = elem; }
+        if self.size == self.cap {
+            self.resize();
+        }
+        unsafe {
+            *self.data.add(self.size) = elem;
+        }
+        if self.size == 0 {
+            return self.size += 1;
+        }
+
+        let mut current = self.size;
+        let mut parent: usize;
         self.size += 1;
 
-        self.min_heapify(self.size - 1, self.pov);
+        while current > 0 {
+            parent = (current - 1) / 2;
+
+            let current_dist = distance_pt(self.pov, self.at_idx(current));
+            let parent_dist = distance_pt(self.pov, self.at_idx(parent));
+
+            if current_dist < parent_dist {
+                self.swap(current, parent);
+                current = parent;
+            } else {
+                break;
+            }
+        }
     }
 
     fn pop_min(&mut self) -> Option<Triangle> {
@@ -81,14 +102,18 @@ impl Heap {
         let min: Triangle = self.at_idx(0);
         let last: Triangle = self.at_idx(self.size);
 
-        unsafe { *self.data.add(0) = last; }
+        unsafe {
+            *self.data.add(0) = last;
+        }
         self.min_heapify(0, self.pov);
-        
+
         Some(min)
     }
 
     fn swap(&mut self, idx: usize, other: usize) {
-        if idx > self.size - 1 || other > self.size - 1 { return; }
+        if idx >= self.size || other >= self.size {
+            return;
+        }
         unsafe {
             let tmp = *self.data.add(idx);
             *self.data.add(idx) = *self.data.add(other);
@@ -101,8 +126,8 @@ impl Heap {
     }
 
     fn min_heapify(&mut self, idx: usize, p: Point) {
-        let l = idx*2 + 1;
-        let r = idx*2 + 2;
+        let l = idx * 2 + 1;
+        let r = idx * 2 + 2;
 
         let mut small_val = distance_pt(p, self.at_idx(idx));
         let mut small_idx = idx;
@@ -129,12 +154,8 @@ impl Drop for Heap {
     }
 }
 
-
 fn distance_pp(p1: Point, p2: Point) -> f32 {
-    ((p1.x - p2.x).powi(2)
-        + (p1.y - p2.y).powi(2)
-        + (p1.z - p2.z).powi(2))
-        .sqrt()
+    ((p1.x - p2.x).powi(2) + (p1.y - p2.y).powi(2) + (p1.z - p2.z).powi(2)).sqrt()
 }
 
 fn distance_pt(p: Point, t: Triangle) -> f32 {
@@ -143,7 +164,6 @@ fn distance_pt(p: Point, t: Triangle) -> f32 {
     let d2 = distance_pp(p, t[2]);
     d0.min(d1).min(d2)
 }
-
 
 fn load_mesh(filename: &str) -> Mesh {
     let contents = std::fs::read_to_string(filename)
@@ -154,11 +174,11 @@ fn load_mesh(filename: &str) -> Mesh {
         .expect("mesh file is missing its triangle count")
         .parse::<usize>()
         .unwrap_or_else(|error| panic!("invalid triangle count in '{filename}': {error}"));
-    
+
     let mut mesh = Mesh::new();
 
     for _ in 0..triangle_count {
-        let mut tmp_points= Vec::new();
+        let mut tmp_points = Vec::new();
         for _ in 0..3 {
             let x = values
                 .next()
@@ -174,8 +194,8 @@ fn load_mesh(filename: &str) -> Mesh {
                 .next()
                 .expect("mesh file is missing a vertex coordinate")
                 .parse::<f32>()
-                .expect("mesh vertex coordinate is not a valid number");  
-            tmp_points.push(Point {x, y, z});
+                .expect("mesh vertex coordinate is not a valid number");
+            tmp_points.push(Point { x, y, z });
         }
 
         let triangle: Triangle = [tmp_points[0], tmp_points[1], tmp_points[2]];
@@ -200,19 +220,28 @@ fn save_to_file(mesh: &Mesh, filename: &str) {
         writeln!(
             writer,
             "{} {} {} {} {} {} {} {} {}",
-            point[0].x, point[0].y, point[0].z,
-            point[1].x, point[1].y, point[1].z,
-            point[2].x, point[2].y, point[2].z,)
-                .expect("failed to write vertex coordinates");
+            point[0].x,
+            point[0].y,
+            point[0].z,
+            point[1].x,
+            point[1].y,
+            point[1].z,
+            point[2].x,
+            point[2].y,
+            point[2].z,
+        )
+        .expect("failed to write vertex coordinates");
     }
 }
 
 fn closest_triangles(mesh: &Mesh, p: Point, count: usize) -> Mesh {
-    let mut heap = Heap::new(count, p, &mesh.triangles);
+    let mut heap = Heap::new(mesh.triangles.len(), p, &mesh.triangles);
     let mut return_mesh = Mesh::new();
     for _ in 0..count {
         match heap.pop_min() {
-            Some(triangle) => return_mesh.triangles.push(triangle),
+            Some(triangle) => {
+                return_mesh.triangles.push(triangle);
+            },
             None => break,
         }
     }
@@ -248,7 +277,6 @@ pub fn main() {
         }
     }
 }
-
 
 //---------------------
 // Allocation
