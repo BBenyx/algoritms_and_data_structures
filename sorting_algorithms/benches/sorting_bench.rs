@@ -1,4 +1,5 @@
-use std::{error::Error, time::Instant, env};
+use criterion::{criterion_group, criterion_main, Criterion, BenchmarkId, BatchSize};
+use std::hint::black_box;
 use sorting_algorithms::sorting::{
     bubble_sort::bubble_sort,
     shaker_sort::shaker_sort,
@@ -8,9 +9,8 @@ use sorting_algorithms::sorting::{
 };
 
 mod test_cases;
-mod csv_writer;
 
-type ListCreator = fn(usize) -> Vec<i32>;
+type ListCreator = fn(usize) -> Vec<u32>;
 type ListSorter<T> = fn(&mut [T]);
 
 struct TestConfiguration<T> {
@@ -19,18 +19,6 @@ struct TestConfiguration<T> {
     sample_size: usize,
     algorithms: Vec<(&'static str, ListSorter<T>)>,
     distributions: Vec<(&'static str, ListCreator)>,
-}
-
-impl<T> TestConfiguration<T> {
-    fn header(&self) -> Vec<String> {
-        [
-            "Sorting algorithm",
-            "Input size (n)",
-            "Distribution",
-            "Mean runtime (ns)",
-            "Sample size for mean"
-        ].into_iter().map(String::from).collect()
-    }
 }
 
 impl<T: Ord> Default for TestConfiguration<T> {
@@ -55,89 +43,36 @@ impl<T: Ord> Default for TestConfiguration<T> {
     }
 }
 
+fn algorithm_tester(c: &mut Criterion) {
+    let config: TestConfiguration<u32> = TestConfiguration::default();
 
-fn main() -> Result<(), Box<dyn Error>>{
-    let arg = match env::args().nth(1) {
-        Some(val) => val,
-        None => return Err("No file name parameter was given!")?
-    };
-    let file_name = arg.trim().trim_matches('/').split('/').nth(0).unwrap();
-    if file_name.len() == 0 { return Err("The given file name parameter cannot be a file name!")?}
-    println!("{}", file_name);
+    let mut group = c.benchmark_group("sorting");
+    group.sample_size(config.sample_size);
 
-    let csv_data = write_builder(TestConfiguration::default());
+    for n in config.range.step_by(config.step) {
+        for (dist_name, distribution) in &config.distributions {
+            let test_list = distribution(n);
 
-    // Creates the results folder if it doesn't exists
-    std::fs::create_dir_all("data")?;
-    csv_writer::write_to_csv(
-        format!("data/{}", file_name),
-        csv_data
-    )?;
+            for (alg_name, algorithm) in &config.algorithms {
+                let benchmark_id = BenchmarkId::new(
+                    format!("{alg_name} - {dist_name}"),
+                    n,
+                );
 
-    Ok(())
-}
-
-
-fn write_builder(configuration: TestConfiguration<i32>) -> Vec<Vec<String>> {
-    let step = configuration.step;
-    let sample_size = configuration.sample_size;
-    if step == 0 || step == 0 {
-        return vec![Vec::new()]
-    }
-
-    let range = configuration.range.clone();
-
-    let mut table = vec![configuration.header()];
-
-    let distributions = configuration.distributions;
-    let algrorithms = configuration.algorithms;
-
-    for n in range.step_by(step) {
-
-        for (distr_name, distr) in &distributions {
-            let test_list = distr(n);
-
-            for (algr_name, algr) in &algrorithms {
-                let mut row = Vec::new();
-
-                row.push(algr_name.to_string());
-                row.push(n.to_string());
-                row.push(distr_name.to_string());
-
-                let data: Vec<Vec<i32>> = (0..sample_size)
-                    .map(|_| test_list.clone())
-                    .collect();
-
-                row.push(mean_run_time_of(algr, data).to_string());
-                row.push(sample_size.to_string());
-
-                table.push(row);
+                group.bench_function(benchmark_id, |b| {
+                    b.iter_batched(
+                        || test_list.clone(),
+                        |mut data| {
+                            algorithm(black_box(data.as_mut_slice()))
+                        },
+                        BatchSize::LargeInput,
+                    )
+                });
             }
         }
     }
-    table
+    group.finish();
 }
 
-fn mean_run_time_of<T: Ord>(func: &ListSorter<T>, list: Vec<Vec<T>>) -> u128 {
-    assert!(!list.is_empty());
-    let mut runtimes: Vec<u128> = Vec::new();
-
-    for mut elem in list {
-        let start = Instant::now();
-        func(&mut elem);
-        runtimes.push(start.elapsed().as_nanos());
-    }
-    runtimes.sort();
-
-    // Taking the trimmed mean
-
-    let trim_val = if runtimes.len() >= 10 {
-        (runtimes.len() as f64 * 0.25) as usize
-    } else {
-        0
-    };
-
-    let sum: u128 = runtimes[trim_val..runtimes.len() - trim_val].iter().sum();
-
-    sum / (runtimes.len() - 2* trim_val) as u128
-}
+criterion_group!(benches, algorithm_tester);
+criterion_main!(benches);
