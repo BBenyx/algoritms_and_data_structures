@@ -36,8 +36,8 @@ impl<T> TestConfiguration<T> {
 impl<T: Ord> Default for TestConfiguration<T> {
     fn default() -> Self {
         Self {
-            range: 100..10000,
-            step: 200,
+            range: 100..4000,
+            step: 300,
             sample_size: 10,
             algorithms: vec![
                 ("Bubble sort", bubble_sort),

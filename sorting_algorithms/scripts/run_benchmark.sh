@@ -10,7 +10,6 @@ if [[ -z "${1:-}" ]]; then
 fi
 
 filename="$1"
-echo "$filename"
 
 # Running rust sorting_bench
 cargo bench --bench sorting_bench -- "$filename"
