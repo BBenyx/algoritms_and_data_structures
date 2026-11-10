@@ -5,6 +5,8 @@ use sorting_algorithms::sorting::{
     insertion_sort::insertion_sort,
     selection_sort::selection_sort,
     heap_sort::heap_sort,
+    quick_sort::quick_sort,
+    merge_sort::merge_sort,
 };
 
 mod test_cases;
@@ -36,7 +38,7 @@ impl<T> TestConfiguration<T> {
 impl<T: Ord> Default for TestConfiguration<T> {
     fn default() -> Self {
         Self {
-            range: 100..4000,
+            range: 100..3000,
             step: 300,
             sample_size: 10,
             algorithms: vec![
@@ -45,6 +47,8 @@ impl<T: Ord> Default for TestConfiguration<T> {
                 ("Insertion sort", insertion_sort),
                 ("Selection sort", selection_sort),
                 ("Heap sort", heap_sort),
+                ("Quick sort", quick_sort),
+                /*("Merge sort", merge_sort), cannot be tested in this framework since it gives back a new list */
             ],
             distributions: vec![
                 ("Ordered", test_cases::ordered),
