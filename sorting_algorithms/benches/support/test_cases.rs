@@ -1,22 +1,22 @@
-pub fn ordered(n: usize) -> Vec<i32> {
+pub fn ordered(n: usize) -> Vec<u32> {
     let mut list = Vec::new();
 
     for i in 0..n {
-        list.push(i as i32);
+        list.push(i as u32);
     }
     list
 }
 
-pub fn reverse_ordered(n: usize) -> Vec<i32> {
+pub fn reverse_ordered(n: usize) -> Vec<u32> {
     let mut list = Vec::new();
 
     for i in (0..n).rev() {
-        list.push(i as i32);
+        list.push(i as u32);
     }
     list
 }
 
-pub fn randoms(n: usize) -> Vec<i32> {
+pub fn randoms(n: usize) -> Vec<u32> {
     use rand::RngExt;
 
     let mut list = Vec::new();
@@ -28,7 +28,7 @@ pub fn randoms(n: usize) -> Vec<i32> {
     list
 }
 
-/*pub fn binary_alternating(n: usize) -> Vec<i32> {
+/*pub fn binary_alternating(n: usize) -> Vec<u32> {
     let mut list = Vec::new();
     
     for i in 0..n {
