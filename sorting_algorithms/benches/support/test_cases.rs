@@ -30,7 +30,7 @@ pub fn randoms(n: usize) -> Vec<u32> {
 
 /*pub fn binary_alternating(n: usize) -> Vec<u32> {
     let mut list = Vec::new();
-    
+
     for i in 0..n {
         list.push((i % 2) as i32);
     }

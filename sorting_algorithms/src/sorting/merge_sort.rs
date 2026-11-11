@@ -1,5 +1,7 @@
-pub fn merge_sort<T: PartialOrd + Clone>(list: &[T]) ->  Vec<&T> {
-    if list.len() < 2 { return list.iter().collect() }
+pub fn merge_sort<T: PartialOrd>(list: &[T]) -> Vec<&T> {
+    if list.len() < 2 {
+        return list.iter().collect();
+    }
 
     let middle_idx = list.len() / 2;
     let left_sorted = merge_sort(&list[..middle_idx]);

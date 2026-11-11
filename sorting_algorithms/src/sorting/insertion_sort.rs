@@ -1,5 +1,7 @@
 pub fn insertion_sort<T: PartialOrd>(list: &mut [T]) {
-    if list.is_empty() { return; }
+    if list.is_empty() {
+        return;
+    }
 
     for key in 1..list.len() {
         let mut left_next = key - 1;
@@ -8,10 +10,10 @@ pub fn insertion_sort<T: PartialOrd>(list: &mut [T]) {
             list.swap(left_next + 1, left_next);
 
             if left_next == 0 {
-                break;      
+                break;
             } else {
                 left_next -= 1;
-            } 
+            }
         }
     }
 }

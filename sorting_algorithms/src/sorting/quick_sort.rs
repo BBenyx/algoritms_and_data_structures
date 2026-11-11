@@ -15,7 +15,6 @@ pub fn quick_sort<T: PartialOrd>(list: &mut [T]) {
     }
     list.swap(pivot_idx, border);
 
-
     if border > 1 {
         quick_sort(&mut list[..border]);
     }
