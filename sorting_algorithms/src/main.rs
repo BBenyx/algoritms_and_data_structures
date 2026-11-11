@@ -1,10 +1,7 @@
-use sorting_algorithms::sorting::{merge_sort::merge_sort, quick_sort::quick_sort};
+use sorting_algorithms::sorting::{counting_sort::counting_sort};
 
 fn main() {
-    let mut test_list = vec![10, 7, 5, 3, 9, 23, 76, 12, 65, 1, 22, 5, 6, 534, 74, 12];
-    let ordered_list = merge_sort(&test_list);
-    println!("{:?}", &ordered_list);
-
-    quick_sort(&mut test_list);
-    println!("{:?}", &test_list);
+    let test_list = vec![10, 7, 5, 3, 9, 10, 2, 9, 5, 1, 6, 5, 6, 4, 4, 0];
+    let ordered_list = counting_sort(&test_list);
+    println!("{:?}", ordered_list);
 }

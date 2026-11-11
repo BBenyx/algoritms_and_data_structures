@@ -17,3 +17,7 @@ harness = false
 [[bench]]
 name = "not_in_place_sorting_bench"
 harness = false
+
+[[bench]]
+name = "non_comparison_sorting_bench"
+harness = false
