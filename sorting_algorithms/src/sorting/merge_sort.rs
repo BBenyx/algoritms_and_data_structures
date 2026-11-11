@@ -1,37 +1,37 @@
-use crate::sorting::bubble_sort::bubble_sort;
-
-pub fn merge_sort<T: PartialOrd + Clone>(list: &[T]) ->  Vec<T> {
-    if list.len() < 2 {
-        return Vec::from(list);
-    } else if list.len() == 2 {
-        return if list[0] > list[1] {
-            vec![list[1].clone(), list[0].clone()]
-        } else {
-            Vec::from(list)
-        }
-    }
+pub fn merge_sort<T: PartialOrd + Clone>(list: &[T]) ->  Vec<&T> {
+    if list.len() < 2 { return list.iter().collect() }
 
     let middle_idx = list.len() / 2;
-    let mut left = merge_sort(&list[..middle_idx]);
-    let mut right = merge_sort(&list[middle_idx..]);
+    let left_sorted = merge_sort(&list[..middle_idx]);
+    let right_sorted = merge_sort(&list[middle_idx..]);
 
-    let mut ordered = Vec::new();
+    let mut left = left_sorted.iter().peekable();
+    let mut right = right_sorted.iter().peekable();
+
+    let mut ordered = Vec::with_capacity(list.len());
 
     loop {
-        if left.is_empty() {
-            ordered.append(&mut right);
+        if left.peek().is_none() {
+            for i in right {
+                ordered.push(*i);
+            }
             break;
-        } else if right.is_empty() {
-            ordered.append(&mut left);
+        } else if right.peek().is_none() {
+            for i in left {
+                ordered.push(*i);
+            }
             break;
         }
 
-        if left[0] < right[0] {
-            ordered.push(left.remove(0));
-        } else {
-            ordered.push(right.remove(0));
+        if let (Some(current_left), Some(current_right)) = (left.peek(), right.peek()) {
+            if current_left <= current_right {
+                ordered.push(**current_left);
+                left.next();
+            } else {
+                ordered.push(**current_right);
+                right.next();
+            }
         }
     }
-
     ordered
 }
