@@ -1,18 +1,18 @@
 use super::test_cases;
 use sorting_algorithms::sorting::{
-    bubble_sort::bubble_sort, heap_sort::heap_sort, insertion_sort::insertion_sort,
-    merge_sort::merge_sort, selection_sort::selection_sort, shaker_sort::shaker_sort,
-    counting_sort::counting_sort, quick_sort::quick_sort,
+    bubble_sort::bubble_sort, counting_sort::counting_sort, heap_sort::heap_sort,
+    insertion_sort::insertion_sort, merge_sort::merge_sort, quick_sort::quick_sort,
+    selection_sort::selection_sort, shaker_sort::shaker_sort, bucket_sort::bucket_sort,
 };
 
 const SAMPLE_RANGE: std::ops::RangeInclusive<usize> = 1000..=4000;
 const STEP_SIZE: usize = 1000;
 const SAMPLE_SIZE: usize = 30;
 
-type ListCreator = fn(usize) -> Vec<u32>;
+type ListCreator = fn(usize) -> Vec<usize>;
 type InPlaceSorter<T> = fn(&mut [T]);
 type NonInPlaceSorter<T> = fn(&[T]) -> Vec<&T>;
-type NonComparisonSorter = fn(&[u32]) -> Vec<u32>;
+type NonComparisonSorter = fn(&[usize]) -> Vec<usize>;
 
 pub enum SorterType<T> {
     InPlace(InPlaceSorter<T>),
@@ -55,9 +55,7 @@ impl<T: Ord> TestConfiguration<T> {
             range: SAMPLE_RANGE,
             step: STEP_SIZE,
             sample_size: SAMPLE_SIZE,
-            algorithms: vec![
-                ("Merge sort", SorterType::NotInPlace(merge_sort))
-            ],
+            algorithms: vec![("Merge sort", SorterType::NotInPlace(merge_sort))],
             distributions: vec![
                 ("Ordered", test_cases::ordered),
                 ("Reverse", test_cases::reverse_ordered),
@@ -72,7 +70,8 @@ impl<T: Ord> TestConfiguration<T> {
             step: STEP_SIZE,
             sample_size: SAMPLE_SIZE,
             algorithms: vec![
-                ("Counting sort", SorterType::NonComparison(counting_sort))
+                ("Counting sort", SorterType::NonComparison(counting_sort)),
+                ("Bucket sort", SorterType::NonComparison(bucket_sort)),
             ],
             distributions: vec![
                 ("Ordered", test_cases::ordered),

@@ -5,7 +5,7 @@ mod support;
 use support::test_configuration::{SorterType, TestConfiguration};
 
 fn not_in_place_sorter_tester(c: &mut Criterion) {
-    let config = TestConfiguration::<u32>::non_in_place_sorters();
+    let config = TestConfiguration::<usize>::non_in_place_sorters();
 
     let mut group = c.benchmark_group("Not in place sorting");
     group.sample_size(config.sample_size);
