@@ -7,3 +7,4 @@ pub mod merge_sort;
 pub mod quick_sort;
 pub mod selection_sort;
 pub mod shaker_sort;
+pub mod test;

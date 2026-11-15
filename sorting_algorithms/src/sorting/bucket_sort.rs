@@ -27,3 +27,6 @@ pub fn bucket_sort(list: &[usize]) -> Vec<usize> {
     }
     ordered
 }
+
+
+// TODO: write unit tests in the future for the sorting algorithms

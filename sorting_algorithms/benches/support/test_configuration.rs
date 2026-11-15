@@ -1,4 +1,4 @@
-use super::test_cases;
+use sorting_algorithms::sorting::test::test_cases;
 use sorting_algorithms::sorting::{
     bubble_sort::bubble_sort, counting_sort::counting_sort, heap_sort::heap_sort,
     insertion_sort::insertion_sort, merge_sort::merge_sort, quick_sort::quick_sort,
