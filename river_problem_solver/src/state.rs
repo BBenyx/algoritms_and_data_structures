@@ -1,4 +1,4 @@
-#[derive(Debug, Eq, PartialEq, Hash, Clone)]
+#[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub struct State {
     /*
     0: Small A,
@@ -38,7 +38,7 @@ pub enum StateType {
     Pending,
 }
 
-pub enum StateChangeError{
+pub enum StateChangeError {
     InvalidFLipPair,
     InvalidTargetState,
 }
