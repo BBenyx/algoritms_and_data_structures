@@ -1,6 +1,6 @@
 use std::collections::LinkedList;
 
-type VertexId = usize;
+pub type VertexId = usize;
 
 pub trait Graph {
     fn cyclic(&mut self) -> bool;
