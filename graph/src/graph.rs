@@ -1,13 +1,13 @@
-use std::arch::x86_64::_mm256_mask_roundscale_pd;
 use std::collections::LinkedList;
 use crate::topological_order;
 use crate::dijkstra;
+use crate::bellman_ford;
 
 pub type VertexId = usize;
 
 pub trait Graph {
     fn is_cyclic(&mut self) -> bool;
-    fn path(&self, from: VertexId, to: VertexId) -> bool;
+    fn path(&self, from: VertexId, to: VertexId) -> Result<bool, GraphError>;
     fn has_negative_weight(&self) -> bool;
 }
 #[derive(Debug, PartialEq, Clone)]
@@ -20,6 +20,7 @@ pub enum Color {
 #[derive(Debug)]
 pub enum GraphError {
     CycleFoundInGraph,
+    NegativeWeightedGraphFoundInGraph,
 }
 
 #[derive(Debug, Hash, Eq, PartialEq)]
@@ -69,7 +70,7 @@ impl WGraph {
                 topo.reverse();
                 Ok(topo)
             },
-            Err(GraphError::CycleFoundInGraph) => Err(GraphError::CycleFoundInGraph),
+            Err(e) => Err(e),
         }
     }
 }
@@ -92,10 +93,15 @@ impl Graph for WGraph {
         false
     }
 
-    fn path(&self, from: VertexId, to: VertexId) -> bool {
+    fn path(&self, from: VertexId, to: VertexId) -> Result<bool, GraphError> {
         match topological_order::path(from, to, self) {
-            Ok(val) => val,
-            Err(GraphError::CycleFoundInGraph) => dijkstra::path(from, to, self)
+            Ok(val) => Ok(val),
+            Err(GraphError::CycleFoundInGraph) if !self.has_negative_weight() => Ok(dijkstra::path(from, to, self)),
+            Err(_) => match bellman_ford::path(from, to, self) {
+                Ok(val) => Ok(val),
+                Err(e) => Err(e),
+            }, 
+            // Only the Bellman Ford can detect an actual negative weighted cycle!
         }
     }
 
