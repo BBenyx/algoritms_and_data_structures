@@ -12,8 +12,8 @@ fn main() {
         let vertex = Vertex::new(elem);
         my_graph.graph.push(vertex)
     }
-    my_graph.graph[0].out_edges.push_front(Edge::new(0, 1));
-    my_graph.graph[0].out_edges.push_front(Edge::new(1, 3));
+    //my_graph.graph[0].out_edges.push_front(Edge::new(0, 1));
+    my_graph.graph[0].out_edges.push_front(Edge::new(1, -30));
     my_graph.graph[0].out_edges.push_front(Edge::new(4, 5));
     my_graph.graph[0].out_edges.push_front(Edge::new(5, 10));
 
@@ -30,7 +30,8 @@ fn main() {
     
     my_graph.graph[6].out_edges.push_front(Edge::new(7, 4));
 
+    println!("Graph has negative weight: {}", my_graph.has_negative_weight());
     println!("Path from 0 to 7 with topo: {:?}", topological_order::path(0, 7, &my_graph));
-    println!("Path from 0 to 7 with Dijkstra: {}.", dijkstra::path(0, 7, &my_graph));
-    println!("Path from 0 to 7 with trait path: {}.", my_graph.path(0, 7));
+    //println!("Path from 0 to 7 with Dijkstra: {}.", dijkstra::path(0, 7, &my_graph));
+    //println!("Path from 0 to 7 with trait path: {}.", my_graph.path(0, 7));
 }

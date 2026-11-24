@@ -1,3 +1,4 @@
+use std::arch::x86_64::_mm256_mask_roundscale_pd;
 use std::collections::LinkedList;
 use crate::topological_order;
 use crate::dijkstra;
@@ -7,6 +8,7 @@ pub type VertexId = usize;
 pub trait Graph {
     fn is_cyclic(&mut self) -> bool;
     fn path(&self, from: VertexId, to: VertexId) -> bool;
+    fn has_negative_weight(&self) -> bool;
 }
 #[derive(Debug, PartialEq, Clone)]
 pub enum Color {
@@ -89,11 +91,23 @@ impl Graph for WGraph {
         }
         false
     }
+
     fn path(&self, from: VertexId, to: VertexId) -> bool {
         match topological_order::path(from, to, self) {
             Ok(val) => val,
             Err(GraphError::CycleFoundInGraph) => dijkstra::path(from, to, self)
         }
+    }
+
+    fn has_negative_weight(&self) -> bool {
+        for v in 0..self.graph.len() {
+            for edge in &self.graph[v].out_edges {
+                if edge.weight < 0 {
+                    return true;
+                }
+            }
+        }
+        false
     }
 }
 
