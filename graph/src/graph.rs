@@ -1,9 +1,12 @@
 use std::collections::LinkedList;
+use crate::topological_order;
+use crate::dijkstra;
 
 pub type VertexId = usize;
 
 pub trait Graph {
-    fn cyclic(&mut self) -> bool;
+    fn is_cyclic(&mut self) -> bool;
+    fn path(&self, from: VertexId, to: VertexId) -> bool;
 }
 #[derive(Debug, PartialEq, Clone)]
 pub enum Color {
@@ -11,6 +14,12 @@ pub enum Color {
     Gray,
     Black,
 }
+
+#[derive(Debug)]
+pub enum GraphError {
+    CycleFoundInGraph,
+}
+
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub struct Vertex {
     pub data: usize,
@@ -29,11 +38,11 @@ impl Vertex {
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub struct Edge {
     pub to: VertexId,
-    pub weight: usize,
+    pub weight: isize,
 }
 
 impl Edge {
-    pub fn new(to: VertexId, weight: usize) -> Self {
+    pub fn new(to: VertexId, weight: isize) -> Self {
         Self { to, weight }
     }
 }
@@ -43,26 +52,23 @@ pub struct WGraph {
     pub graph: Vec<Vertex>,
 }
 
+
 impl WGraph {
     pub fn new() -> WGraph {
         Self { graph: Vec::new() }
     }
 
-    fn cycle_dfs(colors: &mut [Color], graph: &WGraph, v: usize) -> bool {
-        colors[v] = Color::Gray;
+    pub fn topo_sort_from(&self, from: VertexId) -> Result<Vec<VertexId>, GraphError> {
+        let mut colors = vec![Color::White; self.graph.len()];
+        let mut topo: Vec<VertexId> = Vec::new();
 
-        for next in &graph.graph[v].out_edges {
-            match colors[next.to] {
-                Color::White => {
-                    Self::cycle_dfs(colors, graph, next.to);
-                }
-                Color::Gray => return true,
-                Color::Black => (),
-            }
+        match topo_sort(&self, &mut colors, &mut topo, from) {
+            Ok(()) => {
+                topo.reverse();
+                Ok(topo)
+            },
+            Err(GraphError::CycleFoundInGraph) => Err(GraphError::CycleFoundInGraph),
         }
-
-        colors[v] = Color::Black;
-        false
     }
 }
 
@@ -73,15 +79,57 @@ impl Default for WGraph {
 }
 
 impl Graph for WGraph {
-    fn cyclic(&mut self) -> bool {
+    fn is_cyclic(&mut self) -> bool {
         let mut colors = vec![Color::White; self.graph.len()];
 
         for v_idx in 0..self.graph.len() {
-            if colors[v_idx] == Color::White && Self::cycle_dfs(&mut colors, self, v_idx) {
+            if colors[v_idx] == Color::White && cycle_dfs(self, &mut colors, v_idx) {
                 return true;
             };
         }
-
         false
     }
+    fn path(&self, from: VertexId, to: VertexId) -> bool {
+        match topological_order::path(from, to, self) {
+            Ok(val) => val,
+            Err(GraphError::CycleFoundInGraph) => dijkstra::path(from, to, self)
+        }
+    }
+}
+
+fn cycle_dfs(graph: &WGraph, colors: &mut [Color], v: usize) -> bool {
+    colors[v] = Color::Gray;
+
+    for next in &graph.graph[v].out_edges {
+        match colors[next.to] {
+            Color::White => {
+                cycle_dfs(graph, colors, next.to);
+            }
+            Color::Gray => return true,
+            Color::Black => (),
+        }
+    }
+
+    colors[v] = Color::Black;
+    false
+}
+
+fn topo_sort(graph: &WGraph, colors: &mut [Color], order: &mut Vec<VertexId>, v: VertexId) -> Result<(), GraphError> {
+    colors[v] = Color::Gray;
+
+    for next in &graph.graph[v].out_edges {
+        match colors[next.to] {
+            Color::White => match topo_sort(graph, colors, order, next.to) {
+                Err(e) => return Err(e),
+                _ => ()
+            },
+            Color::Gray => return Err(GraphError::CycleFoundInGraph),
+            Color::Black => (),
+        }
+    }
+
+    colors[v] = Color::Black;
+    order.push(v);
+
+    Ok(())
 }

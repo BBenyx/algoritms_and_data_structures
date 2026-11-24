@@ -1,6 +1,6 @@
 use crate::graph::VertexId;
 
-pub type WeightToV = usize;
+pub type WeightToV = isize;
 
 #[derive(Debug)]
 pub struct GrayHeap {

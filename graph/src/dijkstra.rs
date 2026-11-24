@@ -2,7 +2,7 @@ use crate::graph::{Color, VertexId, WGraph};
 use crate::min_heap::GrayHeap;
 
 pub fn path(from: VertexId, to: VertexId, graph: &WGraph) -> bool {
-    let mut states = vec![(0, Color::White); graph.graph.len()];
+    let mut states: Vec<(isize, Color)> = vec![(0, Color::White); graph.graph.len()];
     let mut gray_heap = GrayHeap::new();
 
     states[from].1 = Color::Gray;

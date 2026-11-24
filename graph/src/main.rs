@@ -1,9 +1,9 @@
-use crate::dijkstra::path;
 use crate::graph::{Edge, Graph, Vertex};
 
 pub mod dijkstra;
 pub mod graph;
 pub mod min_heap;
+pub mod topological_order;
 
 fn main() {
     let mut my_graph = graph::WGraph::new();
@@ -24,12 +24,13 @@ fn main() {
     my_graph.graph[3].out_edges.push_front(Edge::new(0, 1));
 
     my_graph.graph[4].out_edges.push_front(Edge::new(1, 7));
-    //my_graph.graph[4].out_edges.push_front(Edge::new(7, 10));
+    my_graph.graph[4].out_edges.push_front(Edge::new(7, 10));
     
     my_graph.graph[5].out_edges.push_front(Edge::new(6, 8));
     
-    my_graph.graph[6].out_edges.push_front(Edge::new(3, 4));
+    my_graph.graph[6].out_edges.push_front(Edge::new(7, 4));
 
-    println!("Cyclic: {:?}", my_graph.cyclic());
-    println!("Path from 0 to 7: {}.", path(0, 7, &my_graph));
+    println!("Path from 0 to 7 with topo: {:?}", topological_order::path(0, 7, &my_graph));
+    println!("Path from 0 to 7 with Dijkstra: {}.", dijkstra::path(0, 7, &my_graph));
+    println!("Path from 0 to 7 with trait path: {}.", my_graph.path(0, 7));
 }
