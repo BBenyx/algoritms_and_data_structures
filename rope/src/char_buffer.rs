@@ -1,3 +1,4 @@
+use std::ops::{Index, IndexMut, RangeFrom};
 use crate::alloc;
 
 pub struct CharBuffer {
@@ -11,7 +12,7 @@ impl CharBuffer {
         Self {
             cap,
             size: 0,
-            data: std::ptr::null_mut(),
+            data: alloc::alloc_char(cap),
         }
     }
     pub fn len(&self) -> usize {
@@ -20,58 +21,71 @@ impl CharBuffer {
     pub fn cap(&self) -> usize {
         self.cap
     }
-
-    pub fn get_value(&self, at: usize) -> Option<char> {
-        if at < self.size {
-            unsafe { Some(*self.data.add(at)) }
-        } else {
-            None
-        }
+    pub fn is_empty(&self) -> bool {
+        self.size == 0
     }
 
-    pub fn get_values(&self) -> Vec<char> {
-        let mut vals = Vec::with_capacity(self.size);
-        for i in 0..self.size {
-            // TODO: maybe need clone here?
-            let val = unsafe { *self.data.add(i) };
-            vals.push(val);
-        }
-        vals
-    }
     
-    pub fn push(&mut self, val: char) -> Result<(), String> {
-        // TODO replace string error
-        if self.size == self.cap { return Err("Overflow".to_string()) }
-        unsafe { *self.data.add(self.size) = val }
-        self.size += 1;        
-        Ok(())
-        
+    pub fn push(&mut self, val: char) {
+        assert_ne!(self.cap, self.size, "CharBuffer overflown!");
+        let pos = self.size;
+        self[pos] = val;
+        self.size += 1;
     }
+
 
     pub fn insert(&mut self, at: usize, chars: &[char]) -> Vec<char> {
-        if at > self.cap { return Vec::from(chars) }
-        let mut rev_chars = Vec::new();
-        if at < self.size {
-            for i in (at..self.size).rev() {
-                rev_chars.push(self.get_value(i).expect("Char buffer size mismatch!"));
-                self.size -= 1;
-            }
-        }
+        assert!(at <= self.size, "Insertion index is out of CharBuffer bound!");
+        let mut char_stack = self.delete(at);
+        char_stack.reverse();
+        char_stack.extend(chars.iter().rev().copied());
 
-        for char in chars.iter().rev() {
-            rev_chars.push(char.clone());
-        }
-
-        for _ in 0..self.cap - self.size {
-            let tmp_char = match rev_chars.pop() {
+        for _ in self.size..self.cap {
+            let char = match char_stack.pop() {
                 Some(val) => val,
-                None => return rev_chars,
+                None => return char_stack,
             };
-            self.push(tmp_char);
-            // TODO handle this later
+            self.push(char);
+            self.size += 1;
         }
-        rev_chars.reverse();
-        rev_chars
+        char_stack.reverse();
+        char_stack
+    }
+
+    pub fn delete(&mut self, from: usize) -> Vec<char> {
+        assert!(from < self.cap, "From index in CharBuffer is out of bound!");
+        let removed = self[from..].to_vec();
+        self.size -= self.size - from;
+        removed
+    }
+}
+
+impl Index<usize> for CharBuffer {
+    type Output = char;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        assert!(index < self.size, "CharBuffer index out of bound!");
+
+        unsafe { &*self.data.add(index) }
+    }
+}
+
+impl IndexMut<usize> for CharBuffer {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        assert!(index <= self.size, "CharBuffer index out of bound!");
+
+        unsafe { &mut *self.data.add(index) }
+    }
+}
+
+impl Index<RangeFrom<usize>> for CharBuffer {
+    type Output = [char];
+
+    fn index(&self, index: RangeFrom<usize>) -> &Self::Output {
+        assert!(index.start < self.size, "CharBuffer range out of bound!");
+        unsafe {
+            std::slice::from_raw_parts(self.data.add(index.start), self.size)
+        }
     }
 }
 
