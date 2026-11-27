@@ -1,5 +1,5 @@
-use std::ops::{Index, IndexMut, RangeFrom};
 use crate::alloc;
+use std::ops::{Index, IndexMut, RangeFrom};
 
 pub struct CharBuffer {
     cap: usize,
@@ -25,7 +25,6 @@ impl CharBuffer {
         self.size == 0
     }
 
-    
     pub fn push(&mut self, val: char) {
         assert_ne!(self.cap, self.size, "CharBuffer overflown!");
         let pos = self.size;
@@ -33,9 +32,11 @@ impl CharBuffer {
         self.size += 1;
     }
 
-
     pub fn insert(&mut self, at: usize, chars: &[char]) -> Vec<char> {
-        assert!(at <= self.size, "Insertion index is out of CharBuffer bound!");
+        assert!(
+            at <= self.size,
+            "Insertion index is out of CharBuffer bound!"
+        );
         let mut char_stack = self.delete(at);
         char_stack.reverse();
         char_stack.extend(chars.iter().rev().copied());
@@ -55,7 +56,7 @@ impl CharBuffer {
     pub fn delete(&mut self, from: usize) -> Vec<char> {
         assert!(from < self.cap, "From index in CharBuffer is out of bound!");
         let removed = self[from..].to_vec();
-        self.size -= self.size - from;
+        self.size = from;
         removed
     }
 }
@@ -83,9 +84,7 @@ impl Index<RangeFrom<usize>> for CharBuffer {
 
     fn index(&self, index: RangeFrom<usize>) -> &Self::Output {
         assert!(index.start < self.size, "CharBuffer range out of bound!");
-        unsafe {
-            std::slice::from_raw_parts(self.data.add(index.start), self.size)
-        }
+        unsafe { std::slice::from_raw_parts(self.data.add(index.start), self.size) }
     }
 }
 
